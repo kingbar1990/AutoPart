@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  server:
+    build: ./server/
+    container_name: server-autopart
+    working_dir: /var/www/server
+    ports:
+      - "$SERVER_PORT:$SERVER_PORT"
+    volumes:
+      - ./server/:/var/www/server
+    command: python manage.py runserver 0.0.0.0:$SERVER_PORT
+    stdin_open: true
+    environment:
+      - DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+      - PGHOST=$DATABASE_HOST
+    env_file:
+      - .env
+    depends_on:
+      - database
+
+  database:
+    container_name: database-autopart
+    image: postgres:latest
+    volumes:
+      - ./initial.sql:/docker-entrypoint-initdb.d/initial.sql
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
